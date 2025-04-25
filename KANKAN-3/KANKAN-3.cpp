@@ -256,7 +256,7 @@ void Det_4_4() {
 
 	//training
 	printf("Training determinants of random 4 * 4 matrices\n");
-	for (int epoch = 0; epoch < 50; ++epoch) {
+	for (int epoch = 0; epoch < 128; ++epoch) {
 		for (int i = 0; i < nTrainingRecords; ++i) {
 			//forward feeding by two layers
 			layer0->Input2Output(features_training[i], models0, derivatives0);
@@ -288,6 +288,8 @@ void Det_4_4() {
 		error = sqrt(error);
 		current_time = clock();
 		printf("Epoch %d, current relative error %f, pearson %f, time %2.3f\n", epoch, error, pearson, (double)(current_time - start_application) / CLOCKS_PER_SEC);
+		
+		if (pearson > 0.975) break;
 	}
 	printf("\n");
 }
@@ -355,7 +357,7 @@ void Tetrahedron() {
 	auto computed3 = std::make_unique<double[]>(nValidationRecords);
 
 	printf("Training areas of faces of random tetrahedrons\n");
-	for (int epoch = 0; epoch < 16; ++epoch) {
+	for (int epoch = 0; epoch < 128; ++epoch) {
 		for (int i = 0; i < nTrainingRecords; ++i) {
 			layer0->Input2Output(features_training[i], models0, derivatives0);
 			layer1->Input2Output(models0, models1, derivatives1);
@@ -405,6 +407,8 @@ void Tetrahedron() {
 		current_time = clock();
 		printf("Epoch %d, RMSE %f, Pearsons: %f %f %f %f, time %2.3f\n", epoch, error, p1, p2, p3, p4,
 			(double)(current_time - start_application) / CLOCKS_PER_SEC);
+
+		if (p1 > 0.98 && p2 > 0.98 && p3 > 0.98 && p4 > 0.98) break;
 	}
 	printf("\n");
 }
@@ -467,7 +471,7 @@ void Medians() {
 	auto computed2 = std::make_unique<double[]>(nValidationRecords);
 
 	printf("Training medians of random triangles\n");
-	for (int epoch = 0; epoch < 8; ++epoch) {
+	for (int epoch = 0; epoch < 128; ++epoch) {
 		for (int i = 0; i < nTrainingRecords; ++i) {
 			kankan->Train(features_training[i], targets_training[i]);
 		}
@@ -502,6 +506,8 @@ void Medians() {
 		current_time = clock();
 		printf("Epoch %d, RMSE %f, Pearsons: %f %f %f, time %2.3f\n", epoch, error, p1, p2, p3,
 			(double)(current_time - start_application) / CLOCKS_PER_SEC);
+
+		if (p1 > 0.985 && p2 > 0.985 && p3 > 0.985) break;
 	}
 	printf("\n");
 }
@@ -559,7 +565,7 @@ void AreasOfTriangles() {
 	auto computed0 = std::make_unique<double[]>(nValidationRecords);
 
 	printf("Training areas of random triangles\n");
-	for (int epoch = 0; epoch < 24; ++epoch) {
+	for (int epoch = 0; epoch < 128; ++epoch) {
 		for (int i = 0; i < nTrainingRecords; ++i) {
 			kankan->Train(features_training[i], targets_training[i]);
 		}
@@ -588,6 +594,8 @@ void AreasOfTriangles() {
 		current_time = clock();
 		printf("Epoch %d, RMSE %f, Pearson: %f, time %2.3f\n", epoch, error, p1, 
 			(double)(current_time - start_application) / CLOCKS_PER_SEC);
+
+		if (p1 > 0.985) break;
 	}
 	printf("\n");
 }
@@ -601,14 +609,15 @@ int main() {
 	//In case of vector target, make sure that ranges for vector elements not significantly different, simply rescale them
 	//if needed.
 
-	//Related targets, the medians of random triangles.
-	Medians();
-
 	//Areas of random triangles.
 	AreasOfTriangles();
 
+	//Related targets, the medians of random triangles.
+	Medians();
+
 	//This simple unit test, features are random matrices of 4 by 4, targets are their determinants.
-	Det_4_4();
+	//This test can be done much faster, I have better code for this test.
+	//Det_4_4();
 
 	//Related targets, the areas of the faces of tetrahedron given by random vertices.
 	Tetrahedron();
